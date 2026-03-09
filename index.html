@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lotería Chiapaneca</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,400&family=Alegreya+SC:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./css/styles.css">
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+</head>
+<body>
+<div id="s-menu" class="screen active">
+  <div class="menu-ornament">✦ ✦ ✦</div>
+  <div class="menu-title">Lotería</div>
+  <div class="menu-title red">Chiapaneca</div>
+  <div class="menu-sub">Gastronomía &amp; Tradición</div>
+  <div class="menu-divider"></div>
+
+  <div class="legend" style="margin-bottom:1.2rem;">
+    <div class="legend-item"><div class="legend-dot lc"></div>Comida</div>
+    <div class="legend-item"><div class="legend-dot lb"></div>Bebida</div>
+    <div class="legend-item"><div class="legend-dot la"></div>Bebida Alcohólica</div>
+    <div class="legend-item"><div class="legend-dot ld"></div>Dulces</div>
+  </div>
+
+  <div class="menu-nav">
+    <button class="nav-btn primary" id="btnNuevoJuego">🎴 Nuevo Juego</button>
+    <button class="nav-btn" id="btnEnciclopedia">📖 Enciclopedia</button>
+    <button class="nav-btn" id="btnDebug" style="opacity:.45;font-size:.72rem;letter-spacing:.08rem;">⚙ Debug</button>
+  </div>
+
+  <div class="menu-card" id="setupCard">
+    <div class="menu-q">¿Cómo quieres jugar?</div>
+    <div class="modo-selector">
+      <button class="modo-btn active" id="modoSolo">👤 Un jugador</button>
+      <button class="modo-btn" id="modoCrear">🌐 Crear sala</button>
+      <button class="modo-btn" id="modoUnirse">🔗 Unirse</button>
+    </div>
+
+    <div class="setup-panel active" id="panelSolo">
+      <div class="menu-q">Tu nombre</div>
+      <div class="players-setup" id="playersSetupSolo">
+        <div class="player-row">
+          <div class="player-num">1</div>
+          <input class="player-input" type="text" id="inputSoloNombre" placeholder="Tu nombre" maxlength="20"/>
+        </div>
+      </div>
+     
+      <div class="timer-setup">
+        <span class="timer-label">⏱ Tiempo por carta:</span>
+        <select class="timer-select" id="timerSelect">
+          <option value="0">Sin límite</option>
+          <option value="5">5 segundos</option>
+          <option value="10">10 segundos</option>
+          <option value="15" selected>15 segundos</option>
+          <option value="20">20 segundos</option>
+          <option value="30">30 segundos</option>
+        </select>
+      </div>
+      <button class="nav-btn primary" id="btnStartSolo" disabled style="width:100%;margin-top:.5rem;font-size:.95rem;padding:.85rem;">¡Comenzar!</button>
+    </div>
+
+    <div class="setup-panel" id="panelCrear">
+      <div class="menu-q">Tu nombre (anfitrión)</div>
+      <div class="player-row" style="margin-bottom:.8rem;">
+        <div class="player-num">👑</div>
+        <input class="player-input" type="text" id="inputHostNombre" placeholder="Tu nombre" maxlength="20"/>
+      </div>
+      <div class="menu-q">¿Cuántos jugadores esperarás?</div>
+      <div class="tablero-options" style="margin-bottom:.8rem;">
+        <button class="t-btn t-btn-mp" data-n="2">2</button>
+        <button class="t-btn t-btn-mp" data-n="3">3</button>
+        <button class="t-btn t-btn-mp" data-n="4">4</button>
+      </div>
+      <div class="timer-setup">
+        <span class="timer-label">⏱ Tiempo por carta:</span>
+        <select class="timer-select" id="timerSelectMP">
+          <option value="0">Sin límite</option>
+          <option value="5">5 segundos</option>
+          <option value="10">10 segundos</option>
+          <option value="15" selected>15 segundos</option>
+          <option value="20">20 segundos</option>
+          <option value="30">30 segundos</option>
+        </select>
+      </div>
+      <button class="nav-btn primary" id="btnCrearSala" disabled style="width:100%;margin-top:.5rem;font-size:.95rem;padding:.85rem;">🌐 Crear Sala</button>
+    </div>
+
+    <div class="setup-panel" id="panelUnirse">
+      <div class="menu-q">Tu nombre</div>
+      <div class="player-row" style="margin-bottom:.8rem;">
+        <div class="player-num">👤</div>
+        <input class="player-input" type="text" id="inputJoinNombre" placeholder="Tu nombre" maxlength="20"/>
+      </div>
+      <div class="menu-q">Código de sala</div>
+      <input class="join-input" type="text" id="inputCodigo" placeholder="Escribe el código aquí" maxlength="6"/>
+      <button class="nav-btn primary" id="btnUnirse" disabled style="width:100%;margin-top:.2rem;font-size:.95rem;padding:.85rem;">🔗 Unirse a Sala</button>
+    </div>
+
+    <label class="access-toggle" id="accessToggle" style="margin-top:1rem;">
+      <div class="toggle-box" id="toggleBox"><div class="toggle-knob"></div></div>
+      Modo accesibilidad (texto grande)
+    </label>
+  </div>
+</div>
+
+<div id="s-enciclopedia" class="screen">
+  <div class="enc-header">
+    <div class="enc-title">📖 Enciclopedia Gastronómica</div>
+    <button class="hbtn" id="btnEncBack">← Menú</button>
+  </div>
+  <div class="enc-body">
+    <div class="enc-filter">
+      <button class="f-btn active" data-cat="todos">Todos</button>
+      <button class="f-btn" data-cat="comida">🥘 Comida</button>
+      <button class="f-btn" data-cat="bebida">🥤 Bebida</button>
+      <button class="f-btn" data-cat="alcoholica">🍷 Alcohólica</button>
+      <button class="f-btn" data-cat="dulces">🍬 Dulces</button>
+    </div>
+    <div class="enc-grid" id="encGrid"></div>
+  </div>
+</div>
+
+<div id="s-lobby" class="screen">
+  <div class="lobby-box">
+    <div class="lobby-title">🌿 Sala de Espera</div>
+    <div class="lobby-code-wrap">
+      <div class="lobby-code-label">CÓDIGO DE SALA</div>
+      <div class="lobby-code" id="lobbyCodigo">——</div>
+      <div class="lobby-code-hint">Comparte este código con los otros jugadores</div>
+    </div>
+    <div class="lobby-players">
+      <div class="lobby-players-title">JUGADORES CONECTADOS</div>
+      <div class="lobby-player-list" id="lobbyPlayerList"></div>
+    </div>
+    <div class="lobby-waiting" id="lobbyWaiting">Esperando jugadores…</div>
+    <button class="lobby-start-btn" id="lobbyStartBtn">🎴 Iniciar Partida</button>
+    <button class="hbtn" id="btnLobbyCancel" style="margin-top:.8rem;width:100%;text-align:center;">Cancelar y volver</button>
+  </div>
+</div>
+
+<div class="disconnect-overlay" id="disconnectOverlay">
+  <div class="disconnect-title">⚠ Conexión perdida</div>
+  <div class="disconnect-msg" id="disconnectMsg">El anfitrión se ha desconectado. La partida ha terminado.</div>
+  <button class="win-btn" id="btnDisconnectMenu">Volver al Menú</button>
+</div>
+
+<div id="s-juego" class="screen">
+  <div class="game-header">
+    <div class="game-logo">Lotería Chiapaneca <span>Gastronomía &amp; Tradición</span></div>
+    <div class="turn-indicator">
+      <div class="turn-label">Turno de</div>
+      <div class="turn-name" id="turnName">—</div>
+    </div>
+    <div class="header-right">
+      <span style="font-family:'Alegreya SC',serif;font-size:.72rem;color:var(--crema-oscuro);opacity:.6;" id="deckCountLabel">32 cartas</span>
+      <button class="hbtn" id="btnJuegoMenu">← Menú</button>
+    </div>
+  </div>
+
+  <div class="game-body">
+    <div class="deck-zone">
+      <div class="timer-ring-wrap" id="timerRingWrap">
+        <svg class="timer-svg" width="80" height="80" viewBox="0 0 80 80">
+          <circle class="timer-track" cx="40" cy="40" r="34"/>
+          <circle class="timer-fill" id="timerCircle" cx="40" cy="40" r="34" stroke-dasharray="213.6" stroke-dashoffset="0"/>
+          <text class="timer-text" x="40" y="40" id="timerText">15</text>
+        </svg>
+      </div>
+
+      <button class="draw-btn" id="drawBtn">🃏 Sacar Carta</button>
+
+      <div class="card-scene" id="mainCardScene">
+        <div class="card-flipper" id="mainCardFlipper">
+          <div class="card-face">
+            <div id="mainCardFront" class="card-front-inner">
+              <div class="card-border-pat"></div>
+              <div class="card-placeholder-wrap">
+                <div class="ph-icon">🌿</div>
+                <div>Presiona "Sacar Carta"</div>
+              </div>
+            </div>
+          </div>
+          <div class="card-face card-back-face">
+            <div class="card-back-inner" id="mainCardBack"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="played-box">
+        <div class="played-lbl">Cartas jugadas</div>
+        <div class="played-chips" id="playedChips"></div>
+      </div>
+    </div>
+
+    <div class="tableros-zone" id="tablerosZone"></div>
+  </div>
+</div>
+
+<div id="s-debug" class="screen">
+  <div class="debug-header">
+    <div class="debug-title">⚙ Modo Debug — Lotería Chiapaneca</div>
+    <button class="hbtn" id="btnDebugBack">← Menú</button>
+  </div>
+  <div class="debug-body">
+    <div class="debug-note">Haz clic en cualquier carta para ver la animación de volteo y su información cultural. No se requiere iniciar partida.</div>
+    <div class="debug-preview" id="debugPreview" style="display:none;">
+      <div class="debug-preview-title">▶ VISTA PREVIA</div>
+      <div class="debug-flip-zone">
+        <div class="debug-card-scene">
+          <div class="debug-card-flipper" id="debugFlipper">
+            <div class="debug-card-face">
+              <div class="card-front-inner" id="debugFront" style="border:3px solid var(--cafe);">
+                <div class="card-border-pat"></div>
+              </div>
+            </div>
+            <div class="debug-card-face debug-card-back-face">
+              <div class="card-back-inner" id="debugBack"></div>
+            </div>
+          </div>
+        </div>
+        <div class="debug-info-box" id="debugInfoBox">
+          <div class="debug-info-name" id="debugInfoName"></div>
+          <div class="debug-info-region" id="debugInfoRegion"></div>
+          <div class="debug-info-p" id="debugInfoOrigen"></div>
+          <div class="debug-info-p" id="debugInfoElab" style="opacity:.7;font-style:italic;"></div>
+          <button class="debug-btn-reset" id="debugBtnReset">↺ Resetear carta</button>
+        </div>
+      </div>
+    </div>
+    <div style="margin:1.2rem 0 .6rem;font-family:'Alegreya SC',serif;font-size:.75rem;letter-spacing:.15rem;color:rgba(39,174,96,.6);">TODAS LAS CARTAS</div>
+    <div class="debug-grid" id="debugGrid"></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modalOverlay" role="dialog" aria-modal="true" aria-labelledby="mName">
+  <div class="modal-box">
+    <div class="modal-head">
+      <div class="modal-emo" id="mEmo"></div>
+      <div class="modal-ttl">
+        <div class="modal-name" id="mName"></div>
+        <div class="modal-meta">
+          <span class="modal-badge" id="mCat"></span>
+          <span class="modal-badge modal-region-badge" id="mRegion"></span>
+        </div>
+      </div>
+      <button class="modal-close" id="modalClose" aria-label="Cerrar">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-sec"><div class="modal-sec-t">🗺 Origen</div><p class="modal-p" id="mOrigen"></p></div>
+      <div class="modal-sec"><div class="modal-sec-t">🍳 Elaboración</div><p class="modal-p" id="mElab"></p></div>
+      <div class="modal-sec"><div class="modal-sec-t">✨ Dato Curioso</div><div class="modal-curiosidad" id="mCurioso"></div></div>
+    </div>
+  </div>
+</div>
+
+<div class="win-overlay" id="winOverlay">
+  <div class="win-flowers">🌺</div>
+  <div class="win-t">¡Lotería!</div>
+  <div class="win-sub" id="winMsg"></div>
+  <button class="win-btn" id="winBtn">Jugar de Nuevo</button>
+</div>
+
+<script type="module" src="./js/main.js"></script>
+</body>
+</html>
